@@ -2,47 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تتبع الطلب | بنك التنمية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متابعة الطلب | بنك التنمية</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; text-align: center; padding: 50px; direction: rtl; }
-        .track-container { max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; }
-        .btn-track { width: 100%; padding: 12px; background: #c5a059; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        #statusResult { margin-top: 20px; padding: 15px; border-radius: 10px; font-weight: bold; display: none; }
-        .pending { background: #fff3cd; color: #856404; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
+        :root { --primary: #006c35; --gold: #c5a059; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f0; direction: rtl; padding: 20px; }
+        .track-card { max-width: 500px; margin: 40px auto; background: white; border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        .input-group { margin: 25px 0; }
+        input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 1.1rem; text-align: center; }
+        .btn-search { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.1rem; }
+        
+        /* نظام التتبع (Timeline) */
+        .timeline { display: none; margin-top: 40px; text-align: right; }
+        .t-step { position: relative; padding-right: 30px; margin-bottom: 20px; border-right: 2px solid #ddd; }
+        .t-step.active { border-right-color: var(--primary); }
+        .t-step::after { content: ''; position: absolute; right: -7px; top: 0; width: 12px; height: 12px; background: #ddd; border-radius: 50%; }
+        .t-step.active::after { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
     </style>
 </head>
 <body>
 
-<div class="track-container">
-    <h2>استعلام عن حالة الطلب</h2>
-    <input type="tel" id="trackPhone" placeholder="أدخل رقم الجوال المسجل">
-    <button class="btn-track" onclick="checkStatus()">استعلام الآن</button>
-    <div id="statusResult"></div>
+<div class="track-card">
+    <i class="fas fa-search-location" style="font-size: 3rem; color: var(--gold);"></i>
+    <h2>متابعة حالة طلبك</h2>
+    <p>أدخل رقم الجوال المسجل للاستعلام</p>
+    
+    <div class="input-group">
+        <input type="tel" id="trackPhone" placeholder="05xxxxxxxx">
+    </div>
+    <button class="btn-search" onclick="doTrack()">استعلام الآن</button>
+
+    <div id="trackResult" class="timeline">
+        <div class="t-step" id="s1"><strong>استلام الطلب</strong><br><small>تم استلام طلبك بنجاح في النظام.</small></div>
+        <div class="t-step" id="s2"><strong>المراجعة والتدقيق</strong><br><small>جاري مراجعة البيانات وصورة الهوية.</small></div>
+        <div class="t-step" id="s3"><strong>القرار النهائي</strong><br><small id="finalText">بانتظار قرار اللجنة.</small></div>
+    </div>
 </div>
 
 <script>
-    const S_URL = 'https://fyaxiwktjdjmgfovsfmb.supabase.co';
-    const S_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXhpd2t0amRqbWdmb3ZzZm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njc5MzcsImV4cCI6MjA5MjU0MzkzN30.gdkzSZJIlaOVSiLgvEy_wKV9cq1ZAMIkM8DMB9yvpgU';
-    const _supabase = supabase.createClient(S_URL, S_KEY);
+    const { createClient } = supabase;
+    const _trackClient = createClient('https://fyaxiwtkjdjmgfovsfmb.supabase.co', 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXhpd2t0amRqbWdmb3ZzZm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njc5MzcsImV4cCI6MjA5MjU0MzkzN30.gdkzSZJIlaOVSiLgvEy_wKV9cq1ZAMIkM8DMB9yvpgU');
 
-    async function checkStatus() {
+    async function doTrack() {
         const phone = document.getElementById('trackPhone').value;
-        const resDiv = document.getElementById('statusResult');
-        resDiv.style.display = 'block';
-        resDiv.innerHTML = "جاري البحث...";
+        const res = await _trackClient.from('applications').select('*').eq('phone', phone).maybeSingle();
 
-        const { data, error } = await _supabase.from('applications').select('status').eq('phone', phone).maybeSingle();
+        if(!res.data) { alert('رقم الجوال غير موجود'); return; }
 
-        if (data) {
-            resDiv.innerHTML = `حالة طلبك الحالية: <br> <b>[ ${data.status} ]</b>`;
-            resDiv.className = data.status === 'تم القبول' ? 'success' : (data.status === 'تم الرفض' ? 'error' : 'pending');
-        } else {
-            resDiv.innerHTML = "❌ عذراً، لا يوجد طلب مسجل بهذا الرقم.";
-            resDiv.className = 'error';
+        document.getElementById('trackResult').style.display = 'block';
+        document.getElementById('s1').className = 't-step active';
+        
+        if(res.data.status === 'pending') {
+            document.getElementById('s2').className = 't-step active';
+        } else if(res.data.status === 'accepted') {
+            document.getElementById('s2').className = 't-step active';
+            document.getElementById('s3').className = 't-step active';
+            document.getElementById('finalText').innerText = "مبروك! تم قبول طلبك.";
+        } else if(res.data.status === 'rejected') {
+            document.getElementById('s2').className = 't-step active';
+            document.getElementById('s3').className = 't-step active';
+            document.getElementById('s3').style.borderRightColor = 'red';
+            document.getElementById('finalText').innerText = "نعتذر، تم رفض الطلب.";
         }
     }
 </script>

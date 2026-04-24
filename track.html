@@ -2,39 +2,170 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>متابعة الطلب | بنك التنمية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متابعة حالة الطلب | بنك التنمية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; text-align: center; padding: 50px 20px; direction: rtl; }
-        .track-box { max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; }
-        .btn-track { width: 100%; padding: 12px; background: #006c35; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        #statusDisplay { display: none; margin-top: 25px; padding: 20px; background: #fff3cd; color: #856404; border-radius: 10px; border: 1px solid #ffeeba; }
+        :root {
+            --primary: #006c35;
+            --gold: #c5a059;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            direction: rtl;
+        }
+
+        .track-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .track-card i.main-icon {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .track-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.6rem;
+        }
+
+        .track-card p.subtitle {
+            color: #777;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-track {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-track:hover {
+            background: #004d26;
+            transform: translateY(-2px);
+        }
+
+        /* صندوق الحالة المحدث */
+        #statusDisplay {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff9e6;
+            border-right: 5px solid var(--gold);
+            border-radius: 12px;
+            text-align: right;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #statusDisplay h4 {
+            color: #856404;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #statusDisplay p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-<div class="track-box">
-    <i class="fas fa-search" style="font-size: 2rem; color: #006c35;"></i>
+<div class="track-card">
+    <i class="fas fa-file-invoice main-icon"></i>
     <h2>استعلام عن حالة الطلب</h2>
-    <p>أدخل رقم الجوال الذي قدمت به</p>
-    <input type="tel" id="userPhone" placeholder="05xxxxxxxx">
+    <p class="subtitle">أدخل رقم الجوال الذي قدمت به لمتابعة تحديثات طلبك</p>
+
+    <div class="input-group">
+        <input type="tel" id="userPhone" placeholder="05xxxxxxxx" maxlength="10">
+    </div>
+
     <button class="btn-track" onclick="showStatus()">استعلام الآن</button>
 
     <div id="statusDisplay">
-        <h4 style="margin:0;">⏳ حالة الطلب: قيد المراجعة</h4>
-        <p style="font-size: 0.85rem; margin-top: 10px;">عزيزي العميل، طلبك حالياً تحت التدقيق من قبل القسم المختص. سيتم إرسال رسالة نصية (SMS) إلى رقم جوالك فور صدور القرار النهائي.</p>
+        <h4><i class="fas fa-hourglass-half"></i> حالة الطلب: قيد المراجعة</h4>
+        <p>
+            عزيزي العميل، طلبك حالياً تحت التدقيق من قبل القسم المختص. 
+            سيتم **التواصل معك عبر البريد الإلكتروني (Email)** المسجل لدينا فور صدور القرار النهائي أو في حال الحاجة لمستندات إضافية.
+        </p>
     </div>
 </div>
 
 <script>
     function showStatus() {
         const phone = document.getElementById('userPhone').value;
+        const display = document.getElementById('statusDisplay');
+        
         if(phone.length < 10) {
-            alert("يرجى إدخال رقم جوال صحيح");
+            alert("يرجى إدخال رقم جوال صحيح مكون من 10 أرقام");
             return;
         }
-        document.getElementById('statusDisplay').style.display = 'block';
+
+        // إظهار النتيجة بحركة أنيميشن
+        display.style.display = 'block';
+        
+        // تمرير الصفحة لأسفل قليلاً لرؤية النتيجة في الجوال
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+        });
     }
 </script>
+
 </body>
 </html>

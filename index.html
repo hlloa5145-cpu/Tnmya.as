@@ -7,32 +7,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #006c35; --gold: #c5a059; --dark: #1a1a1a; --gray: #f8f9fa; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--gray); margin: 0; color: var(--dark); }
-        
-        /* Navbar */
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--gray); margin: 0; direction: rtl; }
         nav { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 15px rgba(0,0,0,0.1); sticky; top: 0; z-index: 1000; }
         .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .nav-links a { text-decoration: none; color: var(--dark); font-weight: 600; margin-right: 20px; transition: 0.3s; }
-        .nav-links a:hover { color: var(--primary); }
-
-        /* Hero Section */
-        .hero { background: linear-gradient(135deg, var(--primary) 0%, #004d26 100%); color: white; padding: 60px 5%; text-align: center; clip-path: ellipse(150% 100% at 50% 0%); }
-        .hero h1 { font-size: 2.5rem; margin-bottom: 15px; }
-        .hero p { font-size: 1.1rem; opacity: 0.9; }
-
-        /* Services Grid */
-        .container { max-width: 1200px; margin: -50px auto 50px; padding: 0 20px; }
+        .nav-links a { text-decoration: none; color: var(--dark); font-weight: 600; margin-right: 20px; }
+        .hero { background: linear-gradient(135deg, var(--primary) 0%, #004d26 100%); color: white; padding: 80px 5% 120px; text-align: center; clip-path: ellipse(150% 100% at 50% 0%); }
+        .container { max-width: 1200px; margin: -80px auto 50px; padding: 0 20px; }
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .s-card { background: white; border-radius: 20px; padding: 40px 30px; text-align: center; transition: 0.4s; border-bottom: 5px solid transparent; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .s-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,108,53,0.1); }
-        .s-card i { font-size: 3.5rem; color: var(--primary); margin-bottom: 20px; }
-        .s-card h3 { font-size: 1.4rem; margin-bottom: 15px; color: var(--primary); }
-        .s-card p { color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-main:hover { background: var(--dark); }
-
-        /* Footer Info */
-        .footer-note { text-align: center; margin-top: 40px; color: #888; font-size: 0.85rem; }
+        .s-card { background: white; border-radius: 20px; padding: 40px 30px; text-align: center; transition: 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .s-card:hover { transform: translateY(-10px); border-bottom: 5px solid var(--gold); }
+        .s-card i { font-size: 3rem; color: var(--primary); margin-bottom: 20px; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 50px; font-weight: 700; width: 100%; cursor: pointer; }
+        
+        /* Footer Style */
+        footer { background: var(--dark); color: white; padding: 60px 5% 20px; margin-top: 100px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; max-width: 1200px; margin: auto; }
+        .footer-section h4 { color: var(--gold); margin-bottom: 20px; border-right: 3px solid var(--primary); padding-right: 10px; }
+        .footer-section p, .footer-section li { color: #bbb; line-height: 1.8; list-style: none; }
+        .footer-bottom { text-align: center; border-top: 1px solid #333; margin-top: 40px; padding-top: 20px; color: #777; }
     </style>
 </head>
 <body>
@@ -55,30 +47,48 @@
         <div class="s-card">
             <i class="fas fa-graduation-cap"></i>
             <h3>تمويل التعليم</h3>
-            <p>استثمر في مستقبلك الأكاديمي بتمويل يغطي كافة الرسوم الدراسية.</p>
+            <p>استثمر في مستقبلك الأكاديمي بتمويل يغطي الرسوم.</p>
             <button class="btn-main" onclick="goToApply('تمويل التعليم')">تقديم الطلب</button>
         </div>
         <div class="s-card">
             <i class="fas fa-house-user"></i>
             <h3>تمويل الأسرة</h3>
-            <p>دعم مخصص لرب الأسرة لضمان حياة كريمة واستقرار معيشي مستدام.</p>
+            <p>دعم مخصص لرب الأسرة لضمان حياة كريمة.</p>
             <button class="btn-main" onclick="goToApply('تمويل الأسرة')">تقديم الطلب</button>
         </div>
         <div class="s-card">
             <i class="fas fa-wallet"></i>
             <h3>تمويل شخصي</h3>
-            <p>سيولة نقدية فورية لتلبية احتياجاتك الشخصية والطارئة بكل سهولة.</p>
+            <p>سيولة نقدية فورية لتلبية احتياجاتك الطارئة.</p>
             <button class="btn-main" onclick="goToApply('تمويل شخصي')">تقديم الطلب</button>
         </div>
         <div class="s-card">
             <i class="fas fa-leaf"></i>
             <h3>تمويل موسمي</h3>
-            <p>تمويل مخصص لدعمك في المواسم والمناسبات الرسمية بمرونة عالية.</p>
+            <p>دعم مخصص للمواسم والمناسبات الرسمية.</p>
             <button class="btn-main" onclick="goToApply('تمويل موسمي')">تقديم الطلب</button>
         </div>
     </div>
-    <p class="footer-note">© 2026 جميع الحقوق محفوظة لـ بنك التنمية - المملكة العربية السعودية</p>
 </div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-section">
+            <h4>عن بنك التنمية</h4>
+            <p>نعمل على تقديم حلول تمويلية رقمية تساهم في تحقيق رؤية المملكة 2030 مع ضمان الخصوصية.</p>
+        </div>
+        <div class="footer-section">
+            <h4>اتصل بنا</h4>
+            <li><i class="fas fa-phone"></i> الرقم الموحد: 920000000</li>
+            <li><i class="fas fa-envelope"></i> care@sdb-portal.sa</li>
+            <li><i class="fas fa-map-marker-alt"></i> الرياض - طريق الملك فهد</li>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 بنك التنمية الإجتماعية - جميع الحقوق محفوظة</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Vision_2030_Logo.png" style="height: 40px; opacity: 0.5; margin-top: 10px;">
+    </div>
+</footer>
 
 <script>
     function goToApply(type) {

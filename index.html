@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بنك التنمية | الرئيسية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary-green: #006c35; --secondary-green: #008442; --light-bg: #f4f7f5; --white: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--light-bg); margin: 0; padding: 0; direction: rtl; }
+        header { background: var(--white); padding: 15px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-bottom: 4px solid var(--primary-green); sticky; top: 0; z-index: 100; }
+        .nav-links { display: flex; justify-content: center; gap: 25px; margin-bottom: 10px; }
+        .nav-links a { text-decoration: none; color: var(--primary-green); font-weight: bold; font-size: 0.9rem; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 20px; }
+        .welcome-section { text-align: center; margin-bottom: 40px; }
+        .welcome-section h1 { color: var(--primary-green); font-size: 1.8rem; margin-bottom: 10px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .card { background: var(--white); border-radius: 15px; padding: 25px; text-align: center; transition: 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 10px 25px rgba(0,108,53,0.1); }
+        .card i { font-size: 2.5rem; color: var(--primary-green); margin-bottom: 15px; }
+        .card h3 { color: #222; margin-bottom: 12px; font-size: 1.3rem; }
+        .card p { font-size: 0.9rem; color: #666; line-height: 1.5; margin-bottom: 20px; height: 50px; }
+        .btn-apply { background-color: var(--primary-green); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; font-size: 1rem; }
+        .btn-apply:hover { background-color: var(--secondary-green); }
+        .floating-btn { position: fixed; bottom: 25px; right: 25px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; animation: pulse 2s infinite; text-decoration: none; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="track.html"><i class="fas fa-search"></i> شيك على طلبك</a>
+    </div>
+    <div style="font-weight: bold; color: var(--primary-green); font-size: 1.4rem;">بنك التنمية</div>
+</header>
+
+<div class="container">
+    <div class="welcome-section">
+        <h1>وش نوع التمويل اللي تحتاجه؟</h1>
+        <p>اختر الخدمة اللي تناسبك وقدم طلبك بدقائق</p>
+    </div>
+
+    <div class="cards-grid">
+        <div class="card">
+            <i class="fas fa-user-graduate"></i>
+            <h3>تمويل التعليم</h3>
+            <p>ندعمك تكمل دراستك وتطور مهاراتك بمبالغ ميسرة.</p>
+            <button class="btn-apply" onclick="startApply('تمويل التعليم')">قدم طلبك الحين</button>
+        </div>
+
+        <div class="card">
+            <i class="fas fa-users"></i>
+            <h3>تمويل الأسرة</h3>
+            <p>حلول تمويلية تساعدك على أعباء الحياة وتدعم استقرار أسرتك.</p>
+            <button class="btn-apply" onclick="startApply('تمويل الأسرة')">قدم طلبك الحين</button>
+        </div>
+
+        <div class="card">
+            <i class="fas fa-user-tie"></i>
+            <h3>تمويل شخصي</h3>
+            <p>تمويل سريع ومرن يغطي احتياجاتك الشخصية والطارئة.</p>
+            <button class="btn-apply" onclick="startApply('تمويل شخصي')">قدم طلبك الحين</button>
+        </div>
+
+        <div class="card">
+            <i class="fas fa-calendar-check"></i>
+            <h3>تمويل موسمي</h3>
+            <p>خلك جاهز لكل موسم.. تمويل مخصص للأعياد والمناسبات.</p>
+            <button class="btn-apply" onclick="startApply('تمويل موسمي')">قدم طلبك الحين</button>
+        </div>
+    </div>
+</div>
+
+<a href="https://t.me/YOUR_USERNAME" class="floating-btn" target="_blank">
+    <i class="fab fa-telegram-plane"></i>
+</a>
+
+<script>
+    function startApply(type) {
+        localStorage.setItem('selectedFinance', type);
+        window.location.href = 'apply.html';
+    }
+</script>
+
+</body>
+</html>

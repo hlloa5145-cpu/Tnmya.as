@@ -3,109 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شيك على طلبك | بنك التنمية</title>
+    <title>متابعة الطلب | بنك التنمية</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #006c35; --bg: #f4f7f5; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); direction: rtl; margin: 0; padding: 20px; }
-        .container { max-width: 550px; margin: 40px auto; background: white; padding: 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
-        h2 { color: var(--primary); margin-bottom: 10px; font-size: 1.6rem; }
-        p.subtitle { color: #666; margin-bottom: 25px; font-size: 0.95rem; }
-        .input-box { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #eee; border-radius: 12px; font-size: 1.2rem; text-align: center; box-sizing: border-box; transition: 0.3s; }
-        .input-box:focus { border-color: var(--primary); outline: none; }
-        .btn-check { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
+        :root { --primary: #006c35; --gold: #c5a059; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f0; direction: rtl; padding: 20px; }
+        .track-card { max-width: 500px; margin: 40px auto; background: white; border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        .input-group { margin: 25px 0; }
+        input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 1.1rem; text-align: center; }
+        .btn-search { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.1rem; }
         
-        #resultBox { margin-top: 30px; padding: 25px; border-radius: 15px; display: none; text-align: right; line-height: 1.6; }
-        .status-pending { background: #fff8e1; border: 1px solid #ffcc80; color: #795548; }
-        .status-accepted { background: #e8f5e9; border: 1px solid #81c784; color: #2e7d32; }
-        .status-rejected { background: #ffebee; border: 1px solid #ef9a9a; color: #c62828; }
-        
-        .status-icon { font-size: 2.5rem; display: block; text-align: center; margin-bottom: 15px; }
-        .nav-home { display: inline-block; margin-top: 25px; color: var(--primary); text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+        /* نظام التتبع (Timeline) */
+        .timeline { display: none; margin-top: 40px; text-align: right; }
+        .t-step { position: relative; padding-right: 30px; margin-bottom: 20px; border-right: 2px solid #ddd; }
+        .t-step.active { border-right-color: var(--primary); }
+        .t-step::after { content: ''; position: absolute; right: -7px; top: 0; width: 12px; height: 12px; background: #ddd; border-radius: 50%; }
+        .t-step.active::after { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>شيك على حالة طلبك</h2>
-    <p class="subtitle">أدخل رقم الطلب اللي وصلك (مثال: SDB-12345)</p>
+<div class="track-card">
+    <i class="fas fa-search-location" style="font-size: 3rem; color: var(--gold);"></i>
+    <h2>متابعة حالة طلبك</h2>
+    <p>أدخل رقم الجوال المسجل للاستعلام</p>
     
-    <input type="text" id="orderInput" class="input-box" placeholder="اكتب رقم الطلب هنا">
-    <button class="btn-check" id="checkBtn" onclick="checkMyStatus()">استعلم عن النتيجة</button>
-
-    <div id="resultBox">
-        <span id="statusIcon" class="status-icon"></span>
-        <strong id="statusTitle" style="font-size: 1.2rem;"></strong>
-        <p id="statusDesc" style="margin-top: 10px;"></p>
+    <div class="input-group">
+        <input type="tel" id="trackPhone" placeholder="05xxxxxxxx">
     </div>
+    <button class="btn-search" onclick="doTrack()">استعلام الآن</button>
 
-    <a href="index.html" class="nav-home">🏠 العودة للرئيسية</a>
+    <div id="trackResult" class="timeline">
+        <div class="t-step" id="s1"><strong>استلام الطلب</strong><br><small>تم استلام طلبك بنجاح في النظام.</small></div>
+        <div class="t-step" id="s2"><strong>المراجعة والتدقيق</strong><br><small>جاري مراجعة البيانات وصورة الهوية.</small></div>
+        <div class="t-step" id="s3"><strong>القرار النهائي</strong><br><small id="finalText">بانتظار قرار اللجنة.</small></div>
+    </div>
 </div>
 
 <script>
-    // الطريقة الصحيحة لتعريف السوبابيز
     const { createClient } = supabase;
-    const SUPABASE_URL = 'https://fyaxiwtkjdjmgfovsfmb.supabase.co';
-    const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXhpd2t0amRqbWdmb3ZzZm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njc5MzcsImV4cCI6MjA5MjU0MzkzN30.gdkzSZJIlaOVSiLgvEy_wKV9cq1ZAMIkM8DMB9yvpgU';
-    
-    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _trackClient = createClient('https://fyaxiwtkjdjmgfovsfmb.supabase.co', 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXhpd2t0amRqbWdmb3ZzZm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njc5MzcsImV4cCI6MjA5MjU0MzkzN30.gdkzSZJIlaOVSiLgvEy_wKV9cq1ZAMIkM8DMB9yvpgU');
 
-    async function checkMyStatus() {
-        const orderNum = document.getElementById('orderInput').value.trim();
-        const resultBox = document.getElementById('resultBox');
-        const sIcon = document.getElementById('statusIcon');
-        const sTitle = document.getElementById('statusTitle');
-        const sDesc = document.getElementById('statusDesc');
-        const btn = document.getElementById('checkBtn');
+    async function doTrack() {
+        const phone = document.getElementById('trackPhone').value;
+        const res = await _trackClient.from('applications').select('*').eq('phone', phone).maybeSingle();
 
-        if (!orderNum) {
-            alert('يا غالي، اكتب رقم الطلب أولاً');
-            return;
-        }
+        if(!res.data) { alert('رقم الجوال غير موجود'); return; }
 
-        btn.disabled = true;
-        btn.innerText = "جاري البحث...";
-
-        try {
-            const { data, error } = await _supabase
-                .from('applications')
-                .select('*')
-                .eq('order_number', orderNum)
-                .maybeSingle(); // استخدام maybeSingle أفضل لتجنب أخطاء الـ fetch
-
-            resultBox.style.display = 'block';
-
-            if (error || !data) {
-                resultBox.className = 'status-rejected';
-                sIcon.innerText = '❌';
-                sTitle.innerText = 'الرقم غير صحيح';
-                sDesc.innerText = 'تأكد من رقم الطلب المكتوب، أو تواصل مع الدعم الفني.';
-            } else {
-                if (data.status === 'pending') {
-                    resultBox.className = 'status-pending';
-                    sIcon.innerText = '⏳';
-                    sTitle.innerText = 'طلبك تحت المراجعة';
-                    sDesc.innerText = `يا هلا يا ${data.full_name}، طلبك استلمناه وهو الحين عند الفريق المختص. خلك قريب وبنرد لك خبر.`;
-                } else if (data.status === 'accepted') {
-                    resultBox.className = 'status-accepted';
-                    sIcon.innerText = '✅';
-                    sTitle.innerText = 'ألف مبروك، تم القبول!';
-                    sDesc.innerText = `مبروك يا ${data.full_name}، تمت الموافقة المبدئية. فريقنا بيتواصل معك قريب.`;
-                } else if (data.status === 'rejected') {
-                    resultBox.className = 'status-rejected';
-                    sIcon.innerText = '✋';
-                    sTitle.innerText = 'نعتذر منك..';
-                    sDesc.innerText = `للأسف يا ${data.full_name}، الطلب ما استوفى الشروط هذي المرة.`;
-                }
-            }
-        } catch (err) {
-            alert('حدث خطأ في الاتصال، تأكد من إنك مسموح بالاتصال (CORS) في إعدادات سوبابيز');
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "استعلم عن النتيجة";
+        document.getElementById('trackResult').style.display = 'block';
+        document.getElementById('s1').className = 't-step active';
+        
+        if(res.data.status === 'pending') {
+            document.getElementById('s2').className = 't-step active';
+        } else if(res.data.status === 'accepted') {
+            document.getElementById('s2').className = 't-step active';
+            document.getElementById('s3').className = 't-step active';
+            document.getElementById('finalText').innerText = "مبروك! تم قبول طلبك.";
+        } else if(res.data.status === 'rejected') {
+            document.getElementById('s2').className = 't-step active';
+            document.getElementById('s3').className = 't-step active';
+            document.getElementById('s3').style.borderRightColor = 'red';
+            document.getElementById('finalText').innerText = "نعتذر، تم رفض الطلب.";
         }
     }
 </script>
-
 </body>
 </html>

